@@ -76,6 +76,37 @@ framework.on("log", (msg) => {
   console.log(msg);
 });
 
+// Listen for ALL messages in spaces where the bot is present
+// This captures messages even when the bot is not mentioned
+framework.on("message", (bot, trigger) => {
+  console.log('\n=== ALL MESSAGES (including non-mentions) ===');
+  console.log(`From: ${trigger.person.displayName} (${trigger.person.emails[0]})`);
+  console.log(`Room: ${bot.room.title} (${bot.room.type})`);
+  console.log(`Message Text: ${trigger.text}`);
+  console.log(`Message HTML: ${trigger.message.html || 'N/A'}`);
+  console.log(`Message ID: ${trigger.message.id}`);
+  console.log(`Created: ${trigger.message.created}`);
+  console.log(`Is Direct: ${bot.isDirect}`);
+  console.log(`Bot was mentioned: ${trigger.message.mentionedPeople ? trigger.message.mentionedPeople.includes(bot.person.id) : false}`);
+  console.log('============================================\n');
+
+  // Reply with the logged information (skip if message is from the bot itself)
+  if (trigger.person.id !== bot.person.id) {
+    const isMentioned = trigger.message.mentionedPeople ? trigger.message.mentionedPeople.includes(bot.person.id) : false;
+    const replyMessage = `**Message Details:**\n\n` +
+      `**From:** ${trigger.person.displayName} (${trigger.person.emails[0]})\n\n` +
+      `**Room:** ${bot.room.title} (${bot.room.type})\n\n` +
+      `**Message Text:** ${trigger.text}\n\n` +
+      `**Message HTML:** ${trigger.message.html || 'N/A'}\n\n` +
+      `**Message ID:** ${trigger.message.id}\n\n` +
+      `**Created:** ${trigger.message.created}\n\n` +
+      `**Is Direct:** ${bot.isDirect}\n\n` +
+      `**Bot was mentioned:** ${isMentioned}`;
+
+    bot.say('markdown', replyMessage);
+  }
+});
+
 // Process incoming messages
 // Each hears() call includes the phrase to match, and the function to call if webex mesages
 // to the bot match that phrase.
